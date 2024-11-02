@@ -12,9 +12,9 @@
       (
         system:
         let
-          project-name = "wwasm";
+          project-name = "traffi-ql";
           rust-channel = "nightly";
-          rust-version = "2023-03-19"; # 1.70.0
+          rust-version = "2024-06-07"; # 1.80.0
           rust-overlay = import rust;
 
           pkgs = import nixpkgs {
@@ -41,7 +41,7 @@
             pname = "wwasm";
             version = "0.0.1";
             src = ./.;
-            cargoHash = "sha256-tKZgG6R4lfN+owo1zXrY84WUvNfLomgNdNTD56gPGuc=";            
+            cargoHash = "sha256-lSVjuVQIQu5iE2fu4QgQtc8ZiMHivzBEJD3FXTfOOso=";            
             buildPhase = ''
               wasm-pack build --target=no-modules
             '';

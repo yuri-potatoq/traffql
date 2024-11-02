@@ -1,22 +1,31 @@
 {
-    "name" : "wwasm",
-    "version" : "1.0",
+    "name": "traffiQL",
+    "version": "1.0",
     "manifest_version": 2,
-    "description" : "wwasm",
-    "permissions": [],
+    "description": "traffiQL",
+    "permissions": [
+        "webRequest",
+        "<all_urls>"
+    ],
+    "background": {
+        "page": "background.html"
+    },
     "content_scripts": [
         {
-            "matches": ["*://*.example.com/*"],
+            "matches": [
+                "<all_urls>"
+            ],
             "js": [
-                "wwasm.js", "run_wasm.js"
+                "traffiQL.js",
+                "run_wasm.js"
             ]
         }
     ],
     "browser_action": {
-        "default_title": "Wwasm",
+        "default_title": "TraffiQL",
         "default_popup": "popup/popup.html"
-      },
+    },
     "web_accessible_resources": [
-        "wwasm_bg.wasm"
-    ]    
+        "traffiQL_bg.wasm"
+    ]
 }

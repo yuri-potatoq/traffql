@@ -1,5 +1,5 @@
 [package]
-name = "wwasm"
+name = "traffiQL"
 version = "0.1.0"
 edition = "2018"
 
@@ -9,7 +9,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = "0.2"
+wasm-bindgen = "0.2.93"
 js-sys = "0.3"
 wasm-bindgen-futures = "0.4"
 console_error_panic_hook = "0.1.6"
