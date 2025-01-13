@@ -1,9 +1,16 @@
-#!/bin/sh
+#! /usr/bin/env sh
 
-echo "removing old build artefact"
+BROWSER=${1:-'chrome'}
+
+set -eux pipefall
+
+echo "removing old build artfacte"
 rm -rf pkg
 
-wasm-pack build --target=no-modules || exit 1
+wasm-pack build --target=web || exit 1
 
 echo "moving pkg stuff"
-cp -r ./_pkg/** ./pkg
+echo $BROWSER
+cp -r ./_pkg/$BROWSER/** ./pkg
+cp -r ./vendor/sqlite-wasm/jswasm/** ./pkg
+

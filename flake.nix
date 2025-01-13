@@ -34,6 +34,8 @@
             cargo = rust-toolchain;
             rustc = rust-toolchain;
           };
+          
+          sqlite = pkgs.sqlite;
         in
         rec {
           # `nix build`
@@ -41,14 +43,13 @@
             pname = "wwasm";
             version = "0.0.1";
             src = ./.;
-            cargoHash = "sha256-lSVjuVQIQu5iE2fu4QgQtc8ZiMHivzBEJD3FXTfOOso=";            
+            cargoHash = "sha256-XjvXQQUvWtA6HNZOlSBuGJW0uFUIT4CQqaalxG7JmGc=";            
             buildPhase = ''
               wasm-pack build --target=no-modules
             '';
             installPhase = ''
-              mkdir -p $out
-              cp -r ./pkg $out
-              cp -rf ./_pkg/* $out/pkg
+              ./build.sh
+              cp -rf ./pkg $out/pkg
               cd $out && chromium --pack-extension=pkg --no-message-box
               rm -r pkg
             '';
