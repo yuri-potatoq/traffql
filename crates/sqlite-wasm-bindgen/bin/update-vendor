@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+set -euxo pipefail
+
+
+TAG=$1
+RELEASE_BUNDLE_URL="https://github.com/sqlite/sqlite-wasm/archive/refs/tags/$TAG.tar.gz"
+TMP_FOLDER=./vendor/tmp
+
+## clean old versions
+rm -rf ./vendor
+
+## download tar-gz
+mkdir -p $TMP_FOLDER && curl -L -o $_/$TAG.tar.gz $RELEASE_BUNDLE_URL
+
+## decompress bundle
+tar -xvzf $TMP_FOLDER/$TAG.tar.gz -C $TMP_FOLDER
+cp -r ${TMP_FOLDER}/sqlite-wasm-${TAG}/sqlite-wasm* ./vendor
+cp -r ${TMP_FOLDER}/sqlite-wasm-${TAG}/{index.mjs,index.d.ts,tsconfig.json,package-lock.json,package.json} ./vendor
+
+rm -rf $TMP_FOLDER

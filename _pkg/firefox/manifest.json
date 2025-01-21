@@ -1,0 +1,36 @@
+{
+    "name": "traffiQL",
+    "version": "1.0",
+    "manifest_version": 3,
+    "description": "traffiQL",
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
+        "webRequestFilterResponse",
+        "<all_urls>"
+    ],
+    "background": {
+        "page": "background.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "traffiQL.js",
+                "run_wasm.js"
+            ]
+        }
+    ],
+    "browser_action": {
+        "default_title": "TraffiQL",
+        "default_popup": "popup/popup.html"
+    },
+    "web_accessible_resources": [
+        "traffiQL_bg.wasm"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+    }
+}

@@ -1,13 +1,11 @@
 # rWasm-Ext
 
-_Project skelleton got from [Mubelotix](https://github.com/Mubelotix/wasm-extension-template)._
-
-
 ### Roadmap:
 - Make it available to another browsers. Currently only able to implement Sqlite3 backed by OPFS on Chrome.
     - Currently, firefox doesn't support OPFS with service worker jobs correctly.
     The reason is to use OPFS we need to claim some key into extension manifest (cross_origin_embedder_policy & cross_origin_opener_policy).
     Keys which enable headers sqlite+OPFS need beacuse it use 'SharedArrayBuffer'.
+    To support crossOriginIsolated and SharedArrayBuffer, firefox should have to support multiple processes, at least for extensions that opt in to COEP/COOP.
         - https://discourse.mozilla.org/t/sqlite-and-opfs-not-working-in-firefox-extension/111667/4
         - https://bugzilla.mozilla.org/show_bug.cgi?id=1673477
 
@@ -39,4 +37,6 @@ _Project skelleton got from [Mubelotix](https://github.com/Mubelotix/wasm-extens
 - [OPFS file system arch](https://web.dev/articles/origin-private-file-system#the_user-visible_versus_the_origin_private_file_system)
 - [Notion use case with OPFS & WASM](https://www.notion.com/blog/how-we-sped-up-notion-in-the-browser-with-wasm-sqlite)
 - [jq stack machine CALL execution](https://github.com/jqlang/jq/blob/master/src/execute.c#L935-L959)
+- [JVM stack](https://www.artima.com/insidejvm/ed2/jvm8.html)
+- [design of stack machines](https://www.researchgate.net/publication/220950780_Design_and_Implementation_of_an_Efficient_Stack_Machine)
 

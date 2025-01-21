@@ -1,8 +1,8 @@
 use wasm_bindgen::prelude::*;
 use web_sys::console; // window
 
-
 mod vm;
+mod ql;
 // use js_sys::Promise;
 // use std::time::Duration;
 // use wasm_bindgen_futures::JsFuture;
