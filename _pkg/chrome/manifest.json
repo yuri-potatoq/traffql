@@ -6,6 +6,7 @@
         "service_worker": "background.js",
         "type": "module"
     },
+    "devtools_page": "devtools.html",
     "content_scripts": [
         {
             "matches": [
@@ -22,7 +23,8 @@
             "resources": [
                 "request_wrapper_script.js",
                 "content_script.js",
-                "sqlite-wasm/jswasm/sqlite3.wasm"
+                "sqlite3.js",
+                "sqlite3.wasm"
             ],
             "matches": [
                 "<all_urls>"

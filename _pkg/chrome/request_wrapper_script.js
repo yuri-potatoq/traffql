@@ -1,12 +1,16 @@
 let extensionId = new URL(
   document.getElementById("request_wrapper_script").src,
 ).searchParams.get("extensionId");
+const port = chrome.runtime.connect(extensionId, {
+  name: "page-script-fetcher",
+});
 
 window.fetch = new Proxy(window.fetch, {
   apply: function (target, that, args) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#syntax
     let temp = target.apply(that, args);
     let [resource, options] = args;
+    options = options ?? {};
 
     temp.then(async (res) => {
       let internalResponse = res.clone();
@@ -44,17 +48,12 @@ window.fetch = new Proxy(window.fetch, {
         }
       }
 
-      // window.dispatchEvent(
-      //   new CustomEvent("interceptedFetch", {
-      //     requestData: reqData,
-      //     responseData: responseData,
-      //   }),
-      // );
-
-      chrome.runtime.sendMessage(extensionId, {
+      port.postMessage({
         requestData: reqData,
         responseData: responseData,
       });
+
+      // chrome.runtime.sendMessage(extensionId, );
       console.log(
         `FETCH: collected data request=${JSON.stringify(reqData)} response=${JSON.stringify(responseData)}`,
       );

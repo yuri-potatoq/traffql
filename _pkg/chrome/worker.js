@@ -1,105 +1,79 @@
-console.log('Running demo from Worker thread.');
+console.log("Running sqlite from Worker thread.");
+
+importScripts("./sqlite3.js");
 
 const log = console.log;
 const warn = console.log;
 const error = console.log;
 
-// chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
-//   console.log(`request: ${request} sender: ${sender} sendResp: ${sendResponse}`);
-    
-// });
-
-
-self.onmessage = (msg) => {
-  console.log("message from main received in worker:", msg);
-};
-
-
-const start = function (sqlite3) {
-  const capi = sqlite3.capi; /*C-style API*/
-  const oo = sqlite3.oo1; /*high-level OO API*/
-  log('sqlite3 version', capi.sqlite3_libversion(), capi.sqlite3_sourceid());
-  let db;
-  if (sqlite3.opfs) {
-    db = new oo.OpfsDb('/mydb.sqlite3');
-    log('The OPFS is available.');
-  } else {
-    db = new oo.DB('/mydb.sqlite3', 'ct');
-    log('The OPFS is not available.');
+class DBManager {
+  constructor(sqlite3InitModule) {
+    this.sqlite3InitModule = sqlite3InitModule;
+    this.db = null;
   }
-  log('transient db =', db.filename);
 
-  try {
-    log('all enabled extensions');
-    db.exec({
-      sql: 'PRAGMA compile_options;',
-      rowMode: 'array',
-      callback: function (row) {
-        log(`${row}`);
-      },
-    })
-    
-    log('Create a table...');
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS requests_headers(
-          header_id INTEGER PRIMARY KEY,
-          key TEXT NOT NULL,
-          value TEXT NOT NULL
-      );
-      
-      CREATE TABLE IF NOT EXISTS requests_url(
-          url_id INTEGER PRIMARY KEY,
-          protocol TEXT NOT NULL,
-          domain TEXT NOT NULL,
-          path TEXT NOT NULL
-      );
-      
-      CREATE TABLE IF NOT EXISTS requests_json_body(
-          json_body_id INTEGER PRIMARY KEY,
-          body JSONB NOT NULL
-      );
-      
-      CREATE TABLE IF NOT EXISTS requests(
-          req_id INTEGER PRIMARY KEY,
-          url_fk INTEGER NOT NULL,
-          header_fk INTEGER NOT NULL,
-          json_body_fk INTEGER NOT NULL,
-      
-          FOREIGN KEY(url_fk) REFERENCES requests_url(url_id),
-          FOREIGN KEY(header_fk) REFERENCES requests_headers(header_id),
-          FOREIGN KEY(json_body_fk) REFERENCES requests_json_body(json_body_id)
-      );
+  init_db() {
+    return this.sqlite3InitModule({
+      print: log,
+      printErr: error,
+    }).then((sqlite3) => {
+      log("Done initializing. Running demo...");
+      try {
+        const capi = sqlite3.capi; /*C-style API*/
+        const oo = sqlite3.oo1; /*high-level OO API*/
+        log(
+          "sqlite3 version",
+          capi.sqlite3_libversion(),
+          capi.sqlite3_sourceid(),
+        );
 
-    `);
-    // db.exec({
-    //   sql: 'insert into t(a,b) values (?,?)',
-    //   bind: [i, i * 2],
-    // });
-    
-    db.exec({
-      sql: 'select a from t order by a limit 3',
-      rowMode: 'array', // 'array' (default), 'object', or 'stmt'
-      callback: function (row) {
-        log('row ', ++this.counter, '=', row);
-      }.bind({ counter: 0 }),
+        if (sqlite3.opfs) {
+          this.db = new oo.OpfsDb("/traffql.sqlite3");
+          log("The OPFS is available.");
+        } else {
+          this.db = new oo.DB("/traffql.sqlite3", "ct");
+          log("The OPFS is not available.");
+        }
+        log("transient db =", this.db.filename);
+      } catch (e) {
+        error("Exception:", e.message);
+      }
     });
-  } finally {
-    db.close();
   }
-};
 
-importScripts('./sqlite3.js');
+  migrate() {
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS request(
+        url TEXT,
+        response_body TEXT,
+        response_code TEXT
+      );
+    `);
+  }
 
-self
-  .sqlite3InitModule({
-    print: log,
-    printErr: error,
-  })
-  .then(function (sqlite3) {
-    log('Done initializing. Running demo...');
-    try {
-      start(sqlite3);
-    } catch (e) {
-      error('Exception:', e.message);
-    }
-  });
+  exec(params) {
+    return this.db.exec(params);
+  }
+}
+
+(async () => {
+  let dbManager = new DBManager(self.sqlite3InitModule);
+  await dbManager.init_db();
+  dbManager.migrate();
+
+  self.onmessage = async ({ data: data }) => {
+    log("message from main received in worker:", data);
+    let { requestId, payload } = data;
+    let { sql } = payload;
+
+    dbManager.exec({
+      sql: sql,
+      callback: function (row) {
+        self.postMessage({ requestId, result: row });
+      },
+    });
+  };
+})();
+
+// to check pragma options
+// PRAGMA compile_options;

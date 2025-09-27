@@ -12,7 +12,7 @@
       (
         system:
         let
-          project-name = "traffi-ql";
+          project-name = "traff-ql";
           rust-channel = "nightly";
           rust-version = "2024-06-07"; # 1.80.0
           rust-overlay = import rust;

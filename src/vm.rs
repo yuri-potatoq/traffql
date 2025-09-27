@@ -22,15 +22,15 @@ struct Vm {
 }
 
 
-impl Vm {
-    fn new() -> Self {
-        Self{}
-    }
+// impl Vm {
+//     fn new() -> Self {
+//         Self{}
+//     }
 
-    fn ingest(&self, instruction: Vec<VmOPCodes>) -> Result<(), String> {
+//     fn ingest(&self, instruction: Vec<VmOPCodes>) -> Result<(), String> {
         
-    }
-}
+//     }
+// }
 
 #[cfg(test)]
 mod test {
