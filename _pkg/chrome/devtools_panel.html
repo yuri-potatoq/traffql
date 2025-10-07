@@ -1,23 +1,19 @@
-<!doctype html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-    </head>
-    <script src="devtools_panel.js" defer></script>
-    <body>
-        <div id="query-form-container">
-            <form id="query-form">
-                <label for="query">Query:</label>
-                <input name="query" type="text" />
+<style>
+    #query-form {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+<script src="devtools_panel.js" defer></script>
+<body>
+    <div id="query-form-container">
+        <form id="query-form">
+            <label for="query">Query:</label>
+            <input name="query" type="text" />
 
-                <label>Extract Data:</label>
-                <input name="download" type="checkbox" value="Extract" />
+            <input type="submit" value="Submit" />
+        </form>
 
-                <label>Upload Data:</label>
-                <input name="upload" type="checkbox" value="Upload" />
-
-                <input type="submit" value="Submit" />
-            </form>
-        </div>
-    </body>
-</html>
+        <button id="extract-opfs">Extract</button>
+    </div>
+</body>

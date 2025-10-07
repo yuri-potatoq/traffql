@@ -39,4 +39,6 @@
 - [jq stack machine CALL execution](https://github.com/jqlang/jq/blob/master/src/execute.c#L935-L959)
 - [JVM stack](https://www.artima.com/insidejvm/ed2/jvm8.html)
 - [design of stack machines](https://www.researchgate.net/publication/220950780_Design_and_Implementation_of_an_Efficient_Stack_Machine)
+- [rust-wasm-browser-extension](https://dev.to/rimutaka/chrome-extension-with-rust-and-wasm-by-example-5cbh)
+- [Stack-Based-Architecture-and-Stack-Based-Query-Language](https://www.odbms.org/wp-content/uploads/2013/11/030.02-Subieta-Stack-Based-Architecture-and-Stack-Based-Query-Language-March-2008.pdf?utm_source=chatgpt.com)
 

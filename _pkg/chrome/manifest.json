@@ -1,51 +1,42 @@
 {
-    "manifest_version": 3,
-    "name": "traffiQL",
-    "version": "1.0.0",
-    "background": {
-        "service_worker": "background.js",
-        "type": "module"
-    },
-    "devtools_page": "devtools.html",
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "content_script.js"
-            ]
-        }
-    ],
-    "permissions": ["offscreen"],
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "request_wrapper_script.js",
-                "content_script.js",
-                "sqlite3.js",
-                "sqlite3.wasm"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ],
-    "host_permissions": [
-        "<all_urls>"
-    ],
-    "externally_connectable": {
-        "matches": [
-            "<all_urls>"
-        ]
-    },
-    "cross_origin_embedder_policy": {
-           "value": "require-corp"
-       },
-       "cross_origin_opener_policy": {
-           "value": "same-origin"
-       },
-       "content_security_policy": {
-           "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
-         }
+  "manifest_version": 3,
+  "name": "traffiQL",
+  "version": "1.0.0",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "devtools_page": "devtools.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"]
+    }
+  ],
+  "permissions": ["offscreen"],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "request_wrapper_script.js",
+        "content_script.js",
+        "sqlite3.js",
+        "sqlite3.wasm",
+        "traffQL_bg.wasm"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "host_permissions": ["<all_urls>"],
+  "externally_connectable": {
+    "matches": ["<all_urls>"]
+  },
+  "cross_origin_embedder_policy": {
+    "value": "require-corp"
+  },
+  "cross_origin_opener_policy": {
+    "value": "same-origin"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
 }

@@ -1,4 +1,4 @@
-const port = chrome.runtime.connect({ name: "devtools-db" });
+const port = chrome.runtime.connect({ name: "devtools-worker" });
 
 // map requestId -> {resolve,reject}
 const pending = new Map();
@@ -18,9 +18,9 @@ port.onMessage.addListener((msg) => {
   }
 });
 
-function sendDbRequest(payload, timeoutMs = 10000) {
+function sendRequest(kind, payload, timeoutMs = 10000) {
   const requestId = `r${nextId++}`;
-  const message = { requestId, kind: "db", payload }; // payload: { op:'select', sql, params }
+  const message = { requestId, kind: kind, payload };
 
   return new Promise((resolve, reject) => {
     pending.set(requestId, { resolve, reject });
@@ -29,11 +29,10 @@ function sendDbRequest(payload, timeoutMs = 10000) {
     const t = setTimeout(() => {
       if (pending.has(requestId)) {
         pending.delete(requestId);
-        reject(new Error("DB request timeout"));
+        reject(new Error(`request ${requestId} timeout`));
       }
     }, timeoutMs);
 
-    // clear timeout when resolved/rejected:
     const origResolve = resolve;
     resolve = (v) => {
       clearTimeout(t);
@@ -49,12 +48,15 @@ queryForm.addEventListener("submit", async function (evt) {
   const query = formData.get("query");
 
   try {
-    const rows = await sendDbRequest({
-      op: "select",
-      sql: query,
-    });
+    const rows = await sendRequest("ql", { query: query });
     console.log("rows", rows);
   } catch (err) {
     console.error("db err", err);
   }
 });
+
+document
+  .getElementById("extract-opfs")
+  .addEventListener("click", async function (evt) {
+    await sendRequest("dump", {});
+  });

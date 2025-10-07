@@ -1,6 +1,7 @@
 let extensionId = new URL(
   document.getElementById("request_wrapper_script").src,
 ).searchParams.get("extensionId");
+
 const port = chrome.runtime.connect(extensionId, {
   name: "page-script-fetcher",
 });
@@ -13,6 +14,10 @@ window.fetch = new Proxy(window.fetch, {
     options = options ?? {};
 
     temp.then(async (res) => {
+      //TODO: move that approach to don't wait the response to save request data.
+      // in case of network instability we still need to index request data.
+      // For now it is enought to proof of concept
+
       let internalResponse = res.clone();
 
       let responseData = {
@@ -27,6 +32,11 @@ window.fetch = new Proxy(window.fetch, {
         method: options.method,
         body: null,
       };
+
+      //TODO: remove, just for tests
+      if (!reqData.url.includes("jsonplaceholder")) {
+        return;
+      }
 
       if (options !== null) {
         if (typeof options.body === "string") {
@@ -49,8 +59,11 @@ window.fetch = new Proxy(window.fetch, {
       }
 
       port.postMessage({
-        requestData: reqData,
-        responseData: responseData,
+        kind: "fetch-data",
+        payload: {
+          request: reqData,
+          response: responseData,
+        },
       });
 
       // chrome.runtime.sendMessage(extensionId, );

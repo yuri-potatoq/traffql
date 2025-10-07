@@ -13,7 +13,7 @@
       reasons: [chrome.offscreen.Reason.WORKERS],
       justification: "use OPFS to host sqlite3",
     });
-    console.log("offscrean created");
+    console.log("[BACKGROUND]: offscrean created");
   }
 })();
 
