@@ -336,41 +336,71 @@ fn boolean_op_parser<'s>() -> impl Parser<'s, QlASTOp> {
 ///
 /// PATH        ::= IDENT (("." IDENT) | ("[" NUMBER "]"))*
 /// ```
-fn expression_parser<'s>() -> impl Parser<'s, QlASTNode> {
+fn pratt_expr_parser<'s>(min_precedence: u8) -> impl Parser<'s, QlASTNode> {
     let ident_or_literal_parser = either_parser(
         number_literal_parser(),
         either_parser(string_literal_parser(), identifier_parser()),
     );
 
+    let infix_operator_parser = either_parser(logic_op_parser(), boolean_op_parser());
+
     move |inp: &'s str| {
-        let (left_expr, rest) = ident_or_literal_parser.parse(inp)?;
+        let (mut left, mut rest) = ident_or_literal_parser.parse(inp)?;
 
-        let rest = skip_space().parse(rest)?.1;
-        let infix_operator_parser = either_parser(logic_op_parser(), boolean_op_parser());
+        loop {
+            rest = skip_space().parse(rest)?.1;
+            let op_result = infix_operator_parser.parse(rest);
 
-        match infix_operator_parser.parse(rest) {
-            Ok((op, rest)) => {
-                let (rigth_expr, rest) = expression_parser().parse(skip_space().parse(rest)?.1)?;
-                return Ok((
-                    QlASTNode::QlNodeExpr(QlExpr::BinaryInfix(
+            match op_result {
+                Ok((op, op_rest)) => {
+                    let precedence = get_operator_precedence(&op);
+                    if precedence < min_precedence {
+                        break;
+                    }
+
+                    rest = skip_space().parse(op_rest)?.1;
+                    let (right, right_rest) = pratt_expr_parser(precedence + 1).parse(rest)?;
+
+                    left = QlASTNode::QlNodeExpr(QlExpr::BinaryInfix(
                         op,
-                        Box::new(left_expr),
-                        Box::new(rigth_expr),
-                    )),
-                    skip_space().parse(rest)?.1,
-                ));
+                        Box::new(left),
+                        Box::new(right),
+                    ));
+
+                    rest = right_rest;
+                }
+                Err(_) => break,
             }
-            _ => Ok((
-                QlASTNode::QlNodeExpr(QlExpr::Term(Box::new(dbg!(left_expr)))),
-                rest,
-            )),
         }
+
+        Ok((left, rest))
     }
+}
+
+fn get_operator_precedence(op: &QlASTOp) -> u8 {
+    match op {
+        QlASTOp::OR => 10,
+        QlASTOp::AND => 20,
+        QlASTOp::EQ | QlASTOp::NEQ | QlASTOp::LT | QlASTOp::GT => 30,
+    }
+}
+
+fn expression_parser<'s>() -> impl Parser<'s, QlASTNode> {
+    pratt_expr_parser(0)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_test() {
+        dbg!("parse result");
+        let r = pratt_expr_parser(0)
+            .parse("200 == code AND 100 != status")
+            .unwrap();
+        dbg!(r);
+    }
 
     #[test]
     fn parse_number_literals() {
@@ -403,7 +433,7 @@ mod tests {
                 QlNodeExpr(BinaryInfix(
                     QlASTOp::EQ,
                     Box::new(QlLiteral(QlASTLiteral::QlText("POST".to_string()))),
-                    Box::new(QlNodeExpr(Term(Box::new(QlIdent("method".to_string())))))
+                    Box::new(QlIdent("method".to_string()))
                 )),
                 ""
             ))
@@ -418,9 +448,7 @@ mod tests {
                     Box::new(QlNodeExpr(BinaryInfix(
                         QlASTOp::EQ,
                         Box::new(QlLiteral(QlASTLiteral::QlText("POST".to_string()))),
-                        Box::new(QlNodeExpr(Term(Box::new(QlIdent(
-                            "response_method".to_string()
-                        )))))
+                        Box::new(QlIdent("response_method".to_string()))
                     )),)
                 )),
                 ""
@@ -439,9 +467,7 @@ mod tests {
                         Box::new(QlNodeExpr(BinaryInfix(
                             QlASTOp::EQ,
                             Box::new(QlIdent("status_code".to_string())),
-                            Box::new(QlNodeExpr(Term(Box::new(QlLiteral(
-                                QlASTLiteral::QlNumber(200)
-                            )))))
+                            Box::new(QlLiteral(QlASTLiteral::QlNumber(200)))
                         )))
                     )))
                 )),
